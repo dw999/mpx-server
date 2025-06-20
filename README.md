@@ -1,6 +1,6 @@
 What is MPX-Server
 ------------------
-MPX-Server is used as email proxy sending agent
+MPX-Server is used as email proxy sending agent for SMS Server 2.x
 
 What license MPX-Server uses
 ----------------------------
