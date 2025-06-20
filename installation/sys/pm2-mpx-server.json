@@ -1,0 +1,18 @@
+{
+  "apps": [
+    {
+      "name": "mpx-server-01",
+      "script": "/www/mailer/mail-worker.js",
+      "cwd" : "/www/mailer/", 
+      "args" : "port=30000"
+    }, 
+    {
+      "name": "mpx-server-02",
+      "script": "/www/mailer/mail-worker.js",
+      "cwd" : "/www/mailer/", 
+      "args" : "port=30001"
+    } 
+  ]
+}
+
+
