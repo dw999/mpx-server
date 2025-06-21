@@ -13,7 +13,7 @@ What platforms MPX-Server support
 Prerequisites of MPX-Server installation
 ----------------------------------------
 - Network connection of your Linux server is well configured and fast enough (> 3Mb/s).
-- You have registered a domain name for your MPX-Servwr, and it has already been pointed to your server's public IP address.
+- You have registered a domain name for your MPX-Server, and it has already been pointed to your server's public IP address.
 
 How to install MPX-Server
 -------------------------
