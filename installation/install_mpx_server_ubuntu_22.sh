@@ -398,7 +398,7 @@ fi
 
 echo ""
 echo "======================================================================================================"
-echo "Step 5: Install MPX 2.0 application server automatic starting script"
+echo "Step 5: Install MPX application server automatic starting script"
 echo "======================================================================================================"
 echo ""
 #-- create PM2 control script here --#
