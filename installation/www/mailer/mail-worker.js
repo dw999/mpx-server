@@ -36,9 +36,9 @@ const telecom = require('./lib/telecom_lib.js');
 let port = 30000;
 process.argv.forEach((val, index) => {
   if (val.match(/port=/i)) {
-  	let params = val.split("=");
-  	let data = parseInt(params[1], 10);
-  	if (data > 0 && data <= 65535) {
+    let params = val.split("=");
+    let data = parseInt(params[1], 10);
+    if (data > 0 && data <= 65535) {
       port = data;
     }
   }
@@ -246,14 +246,14 @@ app.post('/', (req, res) => {
 
 
 app.use(function(req, res, next) {
-	res.status(404);
-	res.send('<h1>404 - Page Not Found</h1>');
+  res.status(404);
+  res.send('<h1>404 - Page Not Found</h1>');
 });
 
 
 app.use(function(req, res, next) {
-	res.status(500);
-	res.send('<h1>500 - Server Error</h1>');
+  res.status(500);
+  res.send('<h1>500 - Server Error</h1>');
 });
 
 
