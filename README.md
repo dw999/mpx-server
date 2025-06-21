@@ -6,7 +6,7 @@ What license MPX-Server uses
 ----------------------------
 Apache license 2.0
 
-What platforms SMS server support
+What platforms MPX-Server support
 ---------------------------------
 - Ubuntu 22.04 (x64 and Arm64).   
 
