@@ -21,7 +21,7 @@
 // =======       ===========     ===========     ==========================================
 // V1.0.00       2025-06-02      DW              Get a email sending request, and send out email accordingly. Use it to work-around
 //                                               the issue of SMS server blockage by worker mail server/provider.
-// V1.0.01       2025-07-07      DW              Use DNS name of SMS server to get the master password, so that a email gateway can
+// V1.0.01       2025-07-07      DW              Use DNS name of SMS server to get the master password, so that an email gateway can
 //                                               serve multiple SMS servers. 
 //#################################################################################################################################
 
