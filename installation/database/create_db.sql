@@ -10,6 +10,7 @@ USE mailworkerdb;
 
 CREATE OR REPLACE TABLE master_passwd
 (
+  site varchar(128) default '',
   cur_passwd varchar(256) default '',
   old_passwd varchar(256) default '',
   last_update datetime

@@ -21,6 +21,8 @@
 // =======       ===========     ===========     ==========================================
 // V1.0.00       2025-06-02      DW              Get a email sending request, and send out email accordingly. Use it to work-around
 //                                               the issue of SMS server blockage by worker mail server/provider.
+// V1.0.01       2025-07-07      DW              Use DNS name of SMS server to get the master password, so that a email gateway can
+//                                               serve multiple SMS servers. 
 //#################################################################################################################################
 
 "use strict";
@@ -68,6 +70,7 @@ app.post('/gateway', (req, res) => {
   try {  
     let token = (typeof(req.body.token) != "string")? "" : wev.base64Decode(req.body.token);
     let tk_iv = (typeof(req.body.tk_iv) != "string")? "" :  wev.base64Decode(req.body.tk_iv);
+    let site = (typeof(req.body.site) != "string")? "" : req.body.site;
     let from = (typeof(req.body.from) != "string")? "" : wev.base64Decode(req.body.from);
     let from_iv = (typeof(req.body.from_iv) != "string")? "" : wev.base64Decode(req.body.from_iv);
     let to = (typeof(req.body.to) != "string")? "" : wev.base64Decode(req.body.to);    
@@ -86,8 +89,8 @@ app.post('/gateway', (req, res) => {
     let aes_key = '';
     let algorithm = "AES-GCM";
     let retval = {status:'1', message:''};
-      
-    let result = _getMasterPassword();
+    
+    let result = _getMasterPassword(site);
     result.then((master_passwd) => {
       let result = cipher.aesDecrypt(algorithm, master_passwd, tk_iv, token);    
       result.then((aes_key) => {
@@ -141,23 +144,30 @@ app.post('/gateway', (req, res) => {
   }
   catch(e) {
     console.log(e);
-    // Make hackers confusing //
-    res.status(404);
-    res.send('<h1>404 : Page Not Found</h1>');
+    // Confuse hackers //
+    let message = "<h1>404 : Page Not Found</h1>";
+    retval = {status:'404', message:message};
+    res.send(JSON.stringify(retval));
   }
 });
 
 
-async function _getMasterPassword() {
+async function _getMasterPassword(site) {
   let conn, sql, param, data, result;
     
   try {
+    if (site.trim() == "") {
+      throw new Error("Invalid data is given!");
+    }
+    
     conn = await dbs.dbConnect(dbs.selectCookie("MWK"));
     
     sql = `SELECT cur_passwd ` +
-          `  FROM master_passwd`;
-          
-    data = JSON.parse(await dbs.sqlQuery(conn, sql));
+          `  FROM master_passwd ` +
+          `  WHERE site = ?`;
+    
+    param = [site];      
+    data = JSON.parse(await dbs.sqlQuery(conn, sql, param));
     
     if (data.length > 0) {
       result = data[0].cur_passwd;
@@ -167,21 +177,22 @@ async function _getMasterPassword() {
         
         sql = `UPDATE master_passwd ` +
               `  SET cur_passwd = ?, ` +
-              `      last_update = CURRENT_TIMESTAMP()`;
+              `      last_update = CURRENT_TIMESTAMP() ` +
+              `  WHERE site = ?`;
               
-        param = [result];
+        param = [result, site];
         await dbs.sqlExec(conn, sql, param);      
       }      
     }      
     else {
-      result = "K5QO6zfF2H8XUYZz";      // Default value
+      result = "K5QO6zfF2H8XUYZz";        // Default value
       
       sql = `INSERT INTO master_passwd ` +
-            `(cur_passwd, old_passwd, last_update) ` +
+            `(site, cur_passwd, old_passwd, last_update) ` +
             `VALUES ` +
-            `(?, '', CURRENT_TIMESTAMP())`;
+            `(?, ?, '', CURRENT_TIMESTAMP())`;
             
-      param = [result];       
+      param = [site, result];       
       await dbs.sqlExec(conn, sql, param);
     }
   }
