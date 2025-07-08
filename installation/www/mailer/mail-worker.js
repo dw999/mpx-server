@@ -146,7 +146,7 @@ app.post('/gateway', (req, res) => {
     console.log(e);
     // Confuse hackers //
     let message = "<h1>404 : Page Not Found</h1>";
-    retval = {status:'404', message:message};
+    let retval = {status:'404', message:message};
     res.send(JSON.stringify(retval));
   }
 });
