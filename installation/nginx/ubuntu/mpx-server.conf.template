@@ -5,19 +5,29 @@ upstream mpx_servers {
     keepalive 16;
 }
 
+map $request_uri $should_redirect {
+    default 	1;   # Redirect everything by default
+    ~*^/gateway 0;   # Do not redirect requests starting with /gateway
+}
+
 server {
     listen 80;
     #-- Change {your-mpx-server-dns} with your DNS domain name --#
     server_name {your-mpx-server-dns};
+
+    # Trigger the temporary 302 redirect if the map returns 1
+    if ($should_redirect) {
+	return 302 https://www.microsoft.com;
+    }
 
     #-- Note: Don't block curl --# 
     if ($http_user_agent ~* LWP::Simple|wget|Go-http-client|python-urllib|GensysInspect|Custom-AsyncHttpClient|Bytespider|zgrab|NetcraftSurveyAgent|paloaltonetworks|HUAWEI) {
         return 404;
     }
 
-    add_header Allow "GET, POST, HEAD" always;
-    if ( $request_method !~ ^(GET|POST|HEAD)$ ) {
-        return 405;
+    add_header Allow "GET, POST" always;
+    if ( $request_method !~ ^(GET|POST)$ ) {
+        return 444;
     }
 
     proxy_http_version 1.1;
@@ -28,7 +38,7 @@ server {
     proxy_read_timeout 90;
     server_tokens off;
 
-    location / {
+    location /gateway {
         return 301 https://$server_name$request_uri;
     }
 }
@@ -39,9 +49,14 @@ server {
     #-- Change {your-mpx-server-dns} with your DNS domain name --#
     server_name {your-mpx-server-dns};
 
+    # Trigger the temporary 302 redirect if the map returns 1
+    if ($should_redirect) {
+        return 302 https://www.microsoft.com;
+    }
+
     #-- Note: Don't block curl --# 
     if ($http_user_agent ~* LWP::Simple|wget|Go-http-client|python-urllib|GensysInspect|Custom-AsyncHttpClient|Bytespider|zgrab|NetcraftSurveyAgent|paloaltonetworks|HUAWEI) {
-        return 404;
+        return 444;
     }
 
     client_header_buffer_size 64k;
@@ -61,9 +76,9 @@ server {
     
     # Configuring HSTS in Nginx
     add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
-    add_header Allow "GET, POST, HEAD" always;
-    if ( $request_method !~ ^(GET|POST|HEAD)$ ) {
-        return 405;
+    add_header Allow "GET, POST" always;
+    if ( $request_method !~ ^(GET|POST)$ ) {
+        return 444;
     }
 
     # Further secure Nginx 
@@ -72,7 +87,7 @@ server {
     add_header X-Content-Type-Options nosniff;
     add_header X-Permitted-Cross-Domain-Policies master-only;
 
-    location / {
+    location /gateway {
         proxy_http_version 1.1;
         proxy_set_header Host $http_host;
         proxy_set_header Connection "";
@@ -84,23 +99,32 @@ server {
     }
 
     location ^~ /package.json {
-        return 404;
+        return 444;
     }
 
     location ^~ /package-lock.json {
-        return 404;
+        return 444;
     }
 
     location ^~ /mail-worker.js {
-        return 404;
+        return 444;
+    }
+
+    location ~ /\.(?!well-known) {
+      deny all;
+      access_log off;
+      log_not_found off;
+      return 444;
     }
 
     location ^~ /lib {
 	deny all;
+	return 444;
     }
 
     location ^~ /node_modules {
 	deny all;
+	return 444;
     }
 }
 

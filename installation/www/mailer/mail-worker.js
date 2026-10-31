@@ -23,18 +23,29 @@
 //                                               the issue of SMS server blockage by worker mail server/provider.
 // V1.0.01       2025-07-07      DW              Use DNS name of SMS server to get the master password, so that an email gateway can
 //                                               serve multiple SMS servers. 
+// V1.0.02       2026-05-23      DW              Use 'express-rate-limit' to prevent (or at least slow down) DDoS attack.
+// V1.0.03       2026-10-30      DW              Suppress "ERR_ERL_PERMISSIVE_TRUST_PROXY" error on 'express-rate-limit'.
 //#################################################################################################################################
 
 "use strict";
 const express = require('express');
+const rateLimit = require('express-rate-limit');
 const bodyParser = require('body-parser');
 const cipher = require('./lib/cipher_lib.js');
 const wev = require('./lib/webenv_lib.js');
 const dbs = require('./lib/db_lib.js');
 const telecom = require('./lib/telecom_lib.js');
 
+//-- Define constant --//
+const limiter = rateLimit({
+  windowMs: 60 * 1000,  // Within 1 minutes
+  limit: 60,            // Limit each IP to 60 requests per 'window'
+  validate: {
+    trustProxy: false,  // Suppress "ERR_ERL_PERMISSIVE_TRUST_PROXY" error
+  }      
+});
 
-//*-- Determine which port should be assigned to express.js --*//
+//-- Determine which port should be assigned to express.js --//
 let port = 30000;
 process.argv.forEach((val, index) => {
   if (val.match(/port=/i)) {
@@ -48,14 +59,20 @@ process.argv.forEach((val, index) => {
 
 const app = express();
 
-//*-- Disable X-Powered-By header. Note: Disabling the X-Powered-By header does not prevent a sophisticated attacker from determining that an --*//
-//*-- app is running Express. It may discourage a casual exploit, but there are other ways to determine an app is running Express.            --*// 
+//-- If true, the client’s IP address can be forwarded by the Nginx reverse proxy server. --//
+app.set('trust proxy', true);
+
+//-- Disable X-Powered-By header. Note: Disabling the X-Powered-By header does not prevent a sophisticated attacker from determining that an --//
+//-- app is running Express. It may discourage a casual exploit, but there are other ways to determine an app is running Express.            --// 
 app.disable('x-powered-by');
 
-//*-- Define static resources (such as library files) location for express --*// 
+//-- Define static resources (such as library files) location for express --// 
 app.use(express.static(__dirname));
 
-//*-- Web page parser to get POST parameters --*// 
+//-- Restrict user request frequency (Slow down DDoS attack) --//
+app.use(limiter);
+
+//-- Web page parser to get POST parameters --// 
 app.use(bodyParser.json());  // for parsing application/json
 app.use(bodyParser.urlencoded({extended: true}));
 

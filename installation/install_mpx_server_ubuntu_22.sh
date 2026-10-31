@@ -22,7 +22,8 @@
 # V1.0.00     2025-06-10      DW              Install MPX servder for SMS 2.x on Ubuntu 22.04 by using 
 #                                             Nginx as web server. Where MPX server is the mail proxy
 #                                             sending server for SMS 2.x, which is blocked by it's worker
-#                                             mail server.  
+#                                             mail server. 
+# V1.0.01     2026-05-27      DW              Add NPM package 'express-rate-limit'.
 #=========================================================================================================
 
 setterm -blank 0
