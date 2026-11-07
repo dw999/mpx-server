@@ -27,6 +27,7 @@
 # V1.0.02     2026-11-07      DW              - For newly installation of node.js, use version 24.x.x.
 #                                             - Phase out node.js version 25 support
 #                                             - Add support of node.js version 26.x.x. 
+#                                             - Create link for local mlkem library.
 #=========================================================================================================
 
 setterm -blank 0
@@ -313,6 +314,7 @@ echo "Step 3: Prepare MPX server directories, programs and required libraries."
 echo "======================================================================================================"
 mkdir -p /www
 cp -Rf ./www/* /www
+mkdir -p /www/mailer/js
 #-- Make all Node.js scripts on directory '/www/mailer' executable --# 
 chmod +x /www/mailer/*.js
 #-- Install required Node.js libraries (base on package.json) --#
@@ -321,6 +323,8 @@ dir=`pwd`
 cd /www/mailer
 npm init -y >> /tmp/install.log
 npm install >> /tmp/install.log
+cd /www/mailer/js
+ln -s /www/mailer/node_modules/mlkem mlkem
 cd $dir  
 
 echo ""
