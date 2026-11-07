@@ -65,6 +65,8 @@
 //                                               'hash-wasm' and phase out library 'bcrypt'.
 //
 // V1.0.16       2025-06-05      DW              Rewrite for project 'mailer'.
+//
+// V1.0.17       2026-11-06      DW              Renew function 'getKyberClientModule' for NPM library 'mlkem' 2.7. 
 //#################################################################################################################################
 
 "use strict";
@@ -1197,7 +1199,11 @@ exports.getKyberClientModule = function() {
   try {
     js = `
     <script type="module">
-      import { MlKem1024 } from "https://esm.sh/mlkem";
+      // 1. Start from mlkem 2.5.0, it can be called locally. 
+      // 2. Start from mlkem 2.7.0, the syntax of library functions are changed. 
+      //    Here is for version 2.7.0 or later only. 
+      import { createMlKem1024 } from "/js/mlkem/esm/mod.js";
+      //import { MlKem1024 } from "https://esm.sh/mlkem";
 
       function base64Encode(u8) {
         return btoa(String.fromCharCode.apply(null, u8))
@@ -1211,8 +1217,8 @@ exports.getKyberClientModule = function() {
         try {
           const pkey = base64Decode(pkey_b64);
 
-          const kem = new MlKem1024();
-          const [ct, skey] = await kem.encap(pkey);
+          const kem = await createMlKem1024();
+          const [ct, skey] = kem.encap(pkey);
               
           const ct_b64 = base64Encode(ct);
           const skey_b64 = base64Encode(skey);              

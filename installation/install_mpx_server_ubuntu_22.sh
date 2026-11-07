@@ -24,6 +24,9 @@
 #                                             sending server for SMS 2.x, which is blocked by it's worker
 #                                             mail server. 
 # V1.0.01     2026-05-27      DW              Add NPM package 'express-rate-limit'.
+# V1.0.02     2026-11-07      DW              - For newly installation of node.js, use version 24.x.x.
+#                                             - Phase out node.js version 25 support
+#                                             - Add support of node.js version 26.x.x. 
 #=========================================================================================================
 
 setterm -blank 0
@@ -203,8 +206,8 @@ then
     mkdir -p /etc/apt/keyrings >> /tmp/install.log
   fi  
   curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
-  #-- Use Node.js 22.x LTS --#
-  NODE_MAJOR=22
+  #-- Use Node.js 24.x LTS --#
+  NODE_MAJOR=24
   echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | sudo tee /etc/apt/sources.list.d/nodesource.list
   apt-get update >> /tmp/install.log
   apt-get -y install nodejs >> /tmp/install.log
@@ -237,14 +240,14 @@ else
     fi
   else
     checker=`node -v | cut -d. -f1`
-    if [[ "$checker" != "v22" ]] && [[ "$checker" != "v23" ]] && [[ "$checker" != "v24" ]]
+    if [[ "$checker" != "v22" ]] && [[ "$checker" != "v24" ]] && [[ "$checker" != "v26" ]]
     then
       if [ ! -d "/etc/apt/keyrings" ]
       then
         mkdir -p /etc/apt/keyrings >> /tmp/install.log
       fi  
       curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
-      NODE_MAJOR=22
+      NODE_MAJOR=24
       echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | sudo tee /etc/apt/sources.list.d/nodesource.list      
       apt-get update >> /tmp/install.log
       apt-get -y upgrade nodejs >> /tmp/install.log
@@ -312,7 +315,7 @@ mkdir -p /www
 cp -Rf ./www/* /www
 #-- Make all Node.js scripts on directory '/www/mailer' executable --# 
 chmod +x /www/mailer/*.js
-#-- Install required Node.js libraries --#
+#-- Install required Node.js libraries (base on package.json) --#
 echo "Install required Node.js libraries"
 dir=`pwd`
 cd /www/mailer
